@@ -281,6 +281,12 @@
       <div class="controls controls-row">
         <input type="email" class="umb-editor" id="emailConfirmationFromAddress" ng-model="model.value.emailConfirmationFromAddress" ng-required="model.value.emailConfirmationRecipientsField" />
       </div>
+      <label class="control-label" for="emailConfirmationFromDisplayName" form-editor-localize key="emailConfirmation.senderName">
+        Sender email display name
+      </label>
+      <div class="controls controls-row">
+        <input type="text" class="umb-editor" id="emailConfirmationFromDisplayName" ng-model="model.value.emailConfirmationFromDisplayName" />
+      </div>
     </div>
     <div ng-show="emailTemplates.notification">
       <h4 ng-show="emailTemplates.confirmation" form-editor-localize key="emailNotification.header">Notification email</h4>
@@ -306,6 +312,12 @@
       </label>
       <div class="controls controls-row">
         <input type="email" class="umb-editor" id="emailNotificationFromAddress" ng-model="model.value.emailNotificationFromAddress" ng-required="model.value.emailNotificationRecipients" />
+      </div>
+      <label class="control-label" for="emailNotificationFromDisplayName" form-editor-localize key="emailNotification.senderName">
+        Sender email display name
+      </label>
+      <div class="controls controls-row">
+        <input type="text" class="umb-editor" id="emailNotificationFromDisplayName" ng-model="model.value.emailNotificationFromDisplayName" />
       </div>
       <label class="control-label"></label>
       <div class="controls controls-row">

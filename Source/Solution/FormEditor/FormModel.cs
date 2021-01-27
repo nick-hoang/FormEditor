@@ -59,12 +59,14 @@ namespace FormEditor
 		public string EmailNotificationRecipients { get; set; }
 		public string EmailNotificationSubject { get; set; }
 		public string EmailNotificationFromAddress { get; set; }
-		public bool EmailNotificationAttachments { get; set; }
+        public string EmailNotificationFromDisplayName { get; set; }
+        public bool EmailNotificationAttachments { get; set; }
 		public string EmailConfirmationRecipientsField { get; set; }
 		public string EmailConfirmationSubject { get; set; }
 		public string EmailConfirmationBody { get; set; }
 		public string EmailConfirmationFromAddress { get; set; }
-		public int SuccessPageId { get; set; }
+        public string EmailConfirmationFromDisplayName { get; set; }
+        public int SuccessPageId { get; set; }
 		public string ReceiptHeader { get; set; }
 		public string ReceiptBody { get; set; }
 		public int? MaxSubmissions { get; set; }
@@ -614,7 +616,7 @@ namespace FormEditor
 						.Where(f => f != null && f.ContentLength > 0)
 						.ToArray()
 					: null;
-				SendEmailType(EmailNotificationSubject, EmailNotificationFromAddress, EmailNotificationRecipients, content, EmailNotificationTemplate, "Notification", uploadedFiles, ref emailBody);
+				SendEmailType(EmailNotificationSubject, EmailNotificationFromAddress, EmailNotificationFromDisplayName, EmailNotificationRecipients, content, EmailNotificationTemplate, "Notification", uploadedFiles, ref emailBody);
 			}
 
 			if(string.IsNullOrWhiteSpace(EmailConfirmationRecipientsField))
@@ -639,11 +641,11 @@ namespace FormEditor
 					// nope
 					emailBody = null;
 				}
-				SendEmailType(EmailConfirmationSubject, EmailConfirmationFromAddress, recipientAddresses, content, EmailConfirmationTemplate, "Confirmation", null, ref emailBody);
+				SendEmailType(EmailConfirmationSubject, EmailConfirmationFromAddress, EmailConfirmationFromDisplayName, recipientAddresses, content, EmailConfirmationTemplate, "Confirmation", null, ref emailBody);
 			}
 		}
 
-		private void SendEmailType(string subject, string senderAddress, string recipientAddresses, IPublishedContent currentContent, string template, string emailType, HttpPostedFile[] uploadedFiles, ref string emailBody)
+		private void SendEmailType(string subject, string senderAddress, string senderDisplayName, string recipientAddresses, IPublishedContent currentContent, string template, string emailType, HttpPostedFile[] uploadedFiles, ref string emailBody)
 		{
 			if(string.IsNullOrEmpty(template))
 			{
@@ -651,14 +653,18 @@ namespace FormEditor
 				return;	
 			}
 
-			var senderEmailAddress = ParseEmailAddresses(senderAddress).FirstOrDefault();
-			if(senderEmailAddress == null)
+			var firstMatchSenderEmailAddress = ParseEmailAddresses(senderAddress).FirstOrDefault();
+			if(firstMatchSenderEmailAddress == null)
 			{
 				Log.Warning("{0} email could not be sent because the email sender address ({1}) was not valid.", emailType, senderAddress);
 				return;
 			}
+            var senderEmailAddress = string.IsNullOrEmpty(senderDisplayName)? 
+                firstMatchSenderEmailAddress :
+                new MailAddress(firstMatchSenderEmailAddress.Address, senderDisplayName);
 
-			var addresses = ParseEmailAddresses(recipientAddresses);
+
+            var addresses = ParseEmailAddresses(recipientAddresses);
 			if(addresses.Any() == false)
 			{
 				Log.Warning("{0} email was not be sent because no valid recipient email addresses was found.", emailType);
@@ -692,7 +698,7 @@ namespace FormEditor
 				return;
 			}
 			var mail = new MailMessage
-			{
+			{                
 				From = from,
 				// #23 - explicitly set Reply-To field
 				ReplyToList = { from },
